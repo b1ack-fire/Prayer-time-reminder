@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prayer Time Companion</title>
+  <style>
+    :root {
+      --bg1: #3c8ce6;
+      --bg2: #3cc8aa;
+      --text: #212121;
+      --subtext: #3c3c3c;
+      --card: rgba(0, 0, 0, 0.10);
+      --card-strong: rgba(0, 0, 0, 0.18);
+      --button: rgba(0, 0, 0, 0.08);
+      --button-hover: rgba(0, 0, 0, 0.18);
+      --shadow: rgba(0,0,0,0.16);
+    }
+
+    body.dark {
+      --bg1: #141e30;
+      --bg2: #243b55;
+      --text: #ffffff;
+      --subtext: #dcdcdc;
+      --card: rgba(255, 255, 255, 0.12);
+      --card-strong: rgba(255, 255, 255, 0.18);
+      --button: rgba(255, 255, 255, 0.10);
+      --button-hover: rgba(255, 255, 255, 0.22);
+      --shadow: rgba(0,0,0,0.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, var(--bg1), var(--bg2));
+      transition: background 0.45s ease, color 0.3s ease;
+      overflow-x: hidden;
+    }
+
+    .wave {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(255,255,255,0.22), rgba(255,255,255,0) 70%);
+      animation: wave-expand 650ms ease-out forwards;
+      z-index: 20;
+    }
+
+    @keyframes wave-expand {
+      from { width: 0; height: 0; opacity: 0.9; }
+      to { width: 1600px; height: 1600px; opacity: 0; }
+    }
+
+    .app {
+      width: min(100%, 560px);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 26px 20px 34px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 6px 4px;
+    }
+
+    .clock h1 {
+      margin: 0;
+      font-size: clamp(2.1rem, 6vw, 3rem);
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+    }
+
+    .clock p {
+      margin: 8px 0 0;
+      color: var(--subtext);
+      font-size: 0.98rem;
+    }
+
+    .theme-btn {
+      width: 52px;
+      height: 52px;
+      border: 0;
+      border-radius: 50%;
+      background: var(--button);
+      color: var(--text);
+      font-size: 1.25rem;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 10px 25px var(--shadow);
+      transition: transform .16s ease, background .2s ease;
+    }
+
+    .theme-btn:hover { background: var(--button-hover); transform: translateY(-1px); }
+
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(12px);
+      border-radius: 28px;
+      padding: 20px;
+      box-shadow: 0 18px 45px var(--shadow);
+      white-space: pre-wrap;
+      line-height: 1.65;
+      font-size: 1rem;
+      min-height: 265px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .action-btn {
+      border: 0;
+      background: var(--button);
+      color: var(--text);
+      border-radius: 20px;
+      padding: 16px 14px;
+      font-weight: 700;
+      font-size: 0.96rem;
+      cursor: pointer;
+      box-shadow: 0 10px 25px var(--shadow);
+      backdrop-filter: blur(10px);
+      transition: transform .16s ease, background .2s ease;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+      background: var(--button-hover);
+    }
+
+    .footer-note {
+      text-align: center;
+      color: var(--subtext);
+      font-size: 0.9rem;
+      padding-top: 4px;
+    }
+
+    @media (max-width: 480px) {
+      .app { padding-inline: 14px; }
+      .controls { grid-template-columns: 1fr; }
+      .card { min-height: 230px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="topbar">
+      <div class="clock">
+        <h1 id="timeLabel">00:00 AM</h1>
+        <p id="dateLabel">Loading date...</p>
+      </div>
+      <button class="theme-btn" id="themeSwitch" aria-label="Toggle theme">☀️</button>
+    </section>
+
+    <section class="card" id="displayArea"></section>
+
+    <section class="controls">
+      <button class="action-btn" id="todayBtn">🗓️ Today's Plan</button>
+      <button class="action-btn" id="fridayBtn">🕌 Friday / Jumu'ah</button>
+      <button class="action-btn" id="statusBtn">⏱ Current Status</button>
+      <button class="action-btn" id="hadithBtn">📖 Read Hadith</button>
+      <button class="action-btn" id="overloadBtn">⚙️ Overloading</button>
+      <button class="action-btn" id="copyBtn">📄 Copy Data</button>
+    </section>
+
+    <div class="footer-note">Static web version based on your Java Swing app.</div>
+  </main>
+
+  <script>
+    const timeLabel = document.getElementById('timeLabel');
+    const dateLabel = document.getElementById('dateLabel');
+    const displayArea = document.getElementById('displayArea');
+    const themeSwitch = document.getElementById('themeSwitch');
+
+    const hadithList = [
+      '"The strong man is not the one who can overpower the tiger, but the one who can control himself when he is angry."\n(Sahih Al-Bukhari)',
+      '"Take advantage of five before five: Your youth before your old age, your health before your illness, your richness before your poverty, your free time before your work, and your life before your death."',
+      '"The best of you are those who have the best of manners and character."\n(Sahih Al-Bukhari)',
+      '"A good word is charity."\n(Sahih Al-Bukhari & Muslim)',
+      '"God does not look at your forms and possessions, but He looks at your hearts and your deeds."'
+    ];
+
+    let hadithIndex = Math.floor(Math.random() * hadithList.length);
+
+    function formatTime(date) {
+      return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+    }
+
+    function formatDate(date) {
+      return date.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+    }
+
+    function updateClock() {
+      const now = new Date();
+      timeLabel.textContent = formatTime(now);
+      dateLabel.textContent = formatDate(now);
+    }
+
+    function showToday() {
+      const now = new Date();
+      displayArea.textContent =
+`🗓️ Daily Prayer Schedule
+${formatDate(now)}
+
+Fajr     04:45 AM - 06:01 AM
+Dhuhr    11:58 AM - 04:14 PM
+Asr      04:15 PM - 05:30 PM
+Maghrib  05:33 PM - 06:03 PM
+Isha     06:45 PM - 11:30 PM`;
+    }
+
+    function showFriday() {
+      displayArea.textContent =
+`🕌 Jumu'ah Special Schedule
+
+Khutbah Starts: 12:45 PM
+Congregation:   01:30 PM
+
+Replaces Dhuhr on Fridays.`;
+    }
+
+    function minutesNow() {
+      const now = new Date();
+      return now.getHours() * 60 + now.getMinutes();
+    }
+
+    function checkStatus() {
+      const min = minutesNow();
+      const status =
+        (min >= 285 && min < 360) ? 'Time for Fajr' :
+        (min >= 718 && min < 975) ? 'Time for Dhuhr' :
+        (min >= 975 && min < 1050) ? 'Time for Asr' :
+        (min >= 1055 && min < 1125) ? 'Time for Maghrib' :
+        (min >= 1125) ? 'Time for Isha' :
+        'No specific prayer time.';
+
+      displayArea.textContent = `⏱ Current Status\n\n${status}`;
+    }
+
+    function showNextHadith() {
+      hadithIndex = (hadithIndex + 1) % hadithList.length;
+      displayArea.textContent = `📖 Hadith\n\n${hadithList[hadithIndex]}`;
+    }
+
+    function showRandomHadith() {
+      displayArea.textContent = `✨ Thought of the Moment\n\n${hadithList[hadithIndex]}`;
+    }
+
+    function demoOverload() {
+      displayArea.textContent = `⚙️ Overloading Demo\n\nSystem handles multiple 'setReminder' commands.`;
+    }
+
+    function demoCopy() {
+      displayArea.textContent = `📄 Copy Constructor\n\nCreated a safe backup of today's schedule.`;
+    }
+
+    function createWave(x, y) {
+      const wave = document.createElement('div');
+      wave.className = 'wave';
+      wave.style.left = `${x}px`;
+      wave.style.top = `${y}px`;
+      document.body.appendChild(wave);
+      wave.addEventListener('animationend', () => wave.remove());
+    }
+
+    themeSwitch.addEventListener('click', (e) => {
+      createWave(e.clientX, e.clientY);
+      document.body.classList.toggle('dark');
+      themeSwitch.textContent = document.body.classList.contains('dark') ? '🌙' : '☀️';
+    });
+
+    document.getElementById('todayBtn').addEventListener('click', showToday);
+    document.getElementById('fridayBtn').addEventListener('click', showFriday);
+    document.getElementById('statusBtn').addEventListener('click', checkStatus);
+    document.getElementById('hadithBtn').addEventListener('click', showNextHadith);
+    document.getElementById('overloadBtn').addEventListener('click', demoOverload);
+    document.getElementById('copyBtn').addEventListener('click', demoCopy);
+
+    updateClock();
+    setInterval(updateClock, 1000);
+    showRandomHadith();
+  </script>
+</body>
+</html>
